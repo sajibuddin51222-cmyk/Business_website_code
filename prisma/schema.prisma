@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("USER")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Project {
+  id              String   @id @default(cuid())
+  title           String
+  category        String
+  description     String
+  longDescription String   @map("long_description")
+  icon            String
+  tags            String // Store as JSON string
+  gradient        String
+  features        String // Store as JSON string
+  videoUrl        String?  @map("video_url")
+  screenshots     String?  // Store as JSON string
+  testLink        String?  @map("test_link")
+  image           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("projects")
+}
+
+model ProjectRequest {
+  id             String   @id @default(cuid())
+  name           String
+  email          String
+  phone          String
+  company        String?
+  projectType    String   @map("project_type")
+  budget         String
+  timeline       String
+  services       String // Store as JSON string
+  hasDesign      Boolean  @default(false) @map("has_design")
+  needsHosting   Boolean  @default(false) @map("needs_hosting")
+  needsPlayStore Boolean  @default(false) @map("needs_play_store")
+  needsAppStore  Boolean  @default(false) @map("needs_app_store")
+  description    String
+  status         String   @default("new")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("project_requests")
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  icon        String
+  gradient    String
+  features    String // Store as JSON string
+  order       Int      @default(0)
+  isActive    Boolean  @default(true) @map("is_active")
+  image       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("services")
+}
+
+model AboutPoint {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  icon        String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true) @map("is_active")
+  image       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("about_points")
+}
+
+model ContactInfo {
+  id        String   @id @default(cuid())
+  email     String
+  phone     String
+  address   String?
+  linkedin  String?
+  twitter   String?
+  github    String?
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("contact_info")
+}
+
+model CompanyStats {
+  id                String   @id @default(cuid())
+  projectsCompleted String   @map("projects_completed")
+  happyClients      String   @map("happy_clients")
+  teamMembers       String   @map("team_members")
+  yearsExperience   String   @map("years_experience")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("company_stats")
+}
+
+model Page {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  content   String
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("pages")
+}
+
+model FooterLink {
+  id        String   @id @default(cuid())
+  title     String
+  url       String
+  column    String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("footer_links")
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  image     String
+  bio       String?
+  linkedin  String?
+  twitter   String?
+  github    String?
+  order     Int      @default(0)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("team_members")
+}
+
+model SiteConfig {
+  id                String   @id @default("hero")
+  heroTitle        String   @default("Transform Your Vision Into Digital Excellence")
+  heroDescription  String   @default("We are a full-service digital agency specializing in web development, mobile apps, UI/UX design, and comprehensive digital solutions.")
+  heroBgImage     String?
+  processTitle     String   @default("How We Work")
+  processDescription String @default("We follow a proven Agile methodology to deliver exceptional results with complete transparency")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("site_config")
+}
+
+
