@@ -153,6 +153,8 @@ model TeamMember {
 model SiteConfig {
   id                String   @id @default("hero")
   heroTitle        String   @default("Transform Your Vision Into Digital Excellence")
+  /// Short line under the hero badge (optional)
+  heroBadgeSubtitle String?
   heroDescription  String   @default("We are a full-service digital agency specializing in web development, mobile apps, UI/UX design, and comprehensive digital solutions.")
   heroBgImage     String?
   processTitle     String   @default("How We Work")

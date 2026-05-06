@@ -1,16 +1,24 @@
 import prisma from '@/lib/db'
 
 export async function getAllProjects() {
-  const projects = await prisma.project.findMany({
-    orderBy: { createdAt: 'desc' },
-  })
-  
-  return projects.map(project => ({
-    ...project,
-    tags: JSON.parse(project.tags || '[]'),
-    features: JSON.parse(project.features || '[]'),
-    screenshots: JSON.parse(project.screenshots || '[]'),
-  }))
+  try {
+    const projects = await prisma.project.findMany({
+      orderBy: { createdAt: 'desc' },
+    })
+
+    return projects.map((project) => ({
+      ...project,
+      tags: JSON.parse(project.tags || '[]'),
+      features: JSON.parse(project.features || '[]'),
+      screenshots: JSON.parse(project.screenshots || '[]'),
+    }))
+  } catch (error) {
+    console.warn(
+      '[getAllProjects] Database unavailable; returning no projects.',
+      error instanceof Error ? error.message : error
+    )
+    return []
+  }
 }
 
 export async function getProjectById(id: string) {

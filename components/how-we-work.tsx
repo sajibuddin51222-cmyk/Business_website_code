@@ -57,94 +57,145 @@ export function HowWeWork({ settings }: { settings: any }) {
   ]
 
   useGSAP(() => {
-    // Header reveal
-    if (headerRef.current) {
-      gsap.fromTo(headerRef.current,
-        { y: 30, opacity: 0, visibility: "visible" },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.5,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: headerRef.current,
-            start: "top 90%",
-            toggleActions: "play reverse play reverse",
-          }
-        }
+    const mm = gsap.matchMedia()
+
+    mm.add("(prefers-reduced-motion: reduce)", () => {
+      gsap.set(
+        [
+          headerRef.current,
+          ".timeline-line-drawing",
+          ".process-step .process-card",
+          ".process-number",
+          ".benefits-card",
+          ".benefit-row",
+        ].filter(Boolean),
+        { clearProps: "transform", opacity: 1, visibility: "visible" }
       )
-    }
+      if (lineRef.current) gsap.set(lineRef.current, { height: "100%" })
+    })
 
-    // Drawing Dotted Line Animation
-    const line = lineRef.current
-    if (line) {
-      gsap.set(line, { visibility: "visible" })
-      gsap.to(line, {
-        height: "100%",
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".timeline-steps-container",
-          start: "top 70%",
-          end: "bottom 80%",
-          scrub: 1,
-        }
-      })
-    }
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      // Header — single play feels closer to phitron.io (no jitter when scrolling back up)
+      if (headerRef.current) {
+        gsap.fromTo(
+          headerRef.current,
+          { y: 36, opacity: 0, visibility: "visible" },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.75,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: headerRef.current,
+              start: "top 88%",
+              toggleActions: "play none none none",
+            },
+          }
+        )
+      }
 
-    // Individual step entrance - Staggered Fade In Up
-    const steps = gsap.utils.toArray(".process-step")
-    steps.forEach((step: any, index: number) => {
-      const content = step.querySelector(".process-card")
-      const number = step.querySelector(".process-number")
+      // Vertical dashed line draws with scroll (smooth scrub)
+      const line = lineRef.current
+      if (line) {
+        gsap.set(line, { visibility: "visible" })
+        gsap.fromTo(
+          line,
+          { height: "0%" },
+          {
+            height: "100%",
+            ease: "none",
+            scrollTrigger: {
+              trigger: ".timeline-steps-container",
+              start: "top 75%",
+              end: "bottom 72%",
+              scrub: 0.65,
+            },
+          }
+        )
+      }
 
-      if (content && number) {
+      const steps = gsap.utils.toArray<HTMLElement>(".process-step")
+      const isDesktop =
+        typeof window !== "undefined" &&
+        window.matchMedia("(min-width: 768px)").matches
+
+      steps.forEach((step, index) => {
+        const content = step.querySelector(".process-card")
+        const number = step.querySelector(".process-number")
+        if (!content || !number) return
+
+        const isEven = index % 2 === 0
+        const fromX = isDesktop ? (isEven ? 72 : -72) : 0
+        const fromY = isDesktop ? 22 : 56
+
         gsap.set([content, number], { visibility: "visible" })
 
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: step,
-            start: "top 85%",
-            toggleActions: "play reverse play reverse",
-          }
+            start: "top 82%",
+            toggleActions: "play none none none",
+          },
         })
 
-        tl.fromTo(content,
-          { y: 100, opacity: 0 },
+        tl.fromTo(
+          number,
+          { scale: 0.35, opacity: 0 },
           {
+            scale: 1,
+            opacity: 1,
+            duration: 0.48,
+            ease: "back.out(1.85)",
+          }
+        ).fromTo(
+          content,
+          { x: fromX, y: fromY, opacity: 0 },
+          {
+            x: 0,
             y: 0,
             opacity: 1,
-            duration: 0.6,
-            ease: "expo.out"
-          }
+            duration: 0.78,
+            ease: "power4.out",
+          },
+          "-=0.28"
         )
-          .fromTo(number,
-            { scale: 0, opacity: 0 },
-            {
-              scale: 1,
-              opacity: 1,
-              duration: 0.3,
-              ease: "back.out(1.7)"
-            },
-            "-=0.8"
-          )
-      }
+      })
+
+      gsap.fromTo(
+        ".benefits-card",
+        { y: 64, opacity: 0, visibility: "visible" },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.65,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".benefits-card",
+            start: "top 86%",
+            toggleActions: "play none none none",
+          },
+        }
+      )
+
+      gsap.fromTo(
+        ".benefit-row",
+        { x: -12, opacity: 0, visibility: "visible" },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.45,
+          stagger: 0.06,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".benefits-inner-grid",
+            start: "top 82%",
+            toggleActions: "play none none none",
+          },
+        }
+      )
     })
 
-    // Benefits card reveal
-    gsap.fromTo(".benefits-card",
-      { y: 80, opacity: 0, visibility: "visible" },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.5,
-        ease: "power4.out",
-        scrollTrigger: {
-          trigger: ".benefits-card",
-          start: "top 85%",
-          toggleActions: "play reverse play reverse",
-        }
-      }
-    )
+    return () => mm.revert()
   }, { scope: containerRef })
 
   return (
@@ -201,7 +252,7 @@ export function HowWeWork({ settings }: { settings: any }) {
                 >
                   {/* Content Side */}
                   <div className={`w-full md:w-1/2 ${isEven ? 'md:pl-20' : 'md:pr-20 md:text-right'}`}>
-                    <Card className="process-card p-8 rounded-[40px] bg-card border border-primary/10 hover:border-primary/40 group transition-all duration-500 shadow-2xl relative overflow-hidden">
+                    <Card className="process-card p-8 rounded-[40px] bg-card border border-primary/10 hover:border-primary/40 group transition-all duration-500 shadow-2xl hover:shadow-[0_28px_60px_-12px_rgba(104,107,253,0.18)] hover:-translate-y-1 relative overflow-hidden">
                       {/* Hover background splash */}
                       <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors" />
 
@@ -248,11 +299,11 @@ export function HowWeWork({ settings }: { settings: any }) {
                 </h3>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5">
+              <div className="benefits-inner-grid grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5">
                 {benefits.map((benefit, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-3 sm:gap-4 md:gap-6 group"
+                    className="benefit-row motion-safe-animate flex items-center gap-3 sm:gap-4 md:gap-6 group"
                   >
                     <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-lg sm:rounded-xl bg-primary/5 flex items-center justify-center group-hover:bg-primary/20 transition-all border border-primary/10 flex-shrink-0">
                       <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />

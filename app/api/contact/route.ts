@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server'
 import { getContactInfo, updateContactInfo, createContactInfo } from '@/lib/backend/contact.service'
 import { verifyAuth } from '@/lib/backend/auth.service'
+import { DEFAULT_CONTACT_INFO } from '@/lib/public-defaults'
 
 export async function GET() {
-  const info = await getContactInfo()
-  return NextResponse.json(info)
+  try {
+    const info = await getContactInfo()
+    if (info) return NextResponse.json(info)
+    return NextResponse.json({ ...DEFAULT_CONTACT_INFO })
+  } catch (err) {
+    console.warn('[GET /api/contact]', err instanceof Error ? err.message : err)
+    return NextResponse.json({ ...DEFAULT_CONTACT_INFO })
+  }
 }
 
 export async function POST(request: Request) {

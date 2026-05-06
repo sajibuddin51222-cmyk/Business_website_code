@@ -4,6 +4,8 @@ import { useEffect, useState } from "react"
 import { Facebook, Twitter, Linkedin, Instagram, Github } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { parseJsonResponse } from "@/lib/utils"
+import { DEFAULT_CONTACT_INFO } from "@/lib/public-defaults"
 
 interface ContactInfo {
   linkedin?: string
@@ -26,18 +28,21 @@ export function Footer() {
   const [columns, setColumns] = useState<Record<string, FooterLink[]>>({})
 
   useEffect(() => {
-    // Fetch contact info
-    fetch("/api/contact")
-      .then(res => res.json())
-      .then(data => setContactInfo(data))
-      .catch(err => console.error("Error fetching contact info:", err))
+    ;(async () => {
+      try {
+        const res = await fetch("/api/contact")
+        const data = await parseJsonResponse(res, { ...DEFAULT_CONTACT_INFO })
+        setContactInfo(data)
+      } catch (err) {
+        console.error("Error fetching contact info:", err)
+        setContactInfo({ ...DEFAULT_CONTACT_INFO })
+      }
 
-    // Fetch footer links
-    fetch("/api/footer-links")
-      .then(res => res.json())
-      .then((data: FooterLink[]) => {
+      try {
+        const res = await fetch("/api/footer-links")
+        const data = await parseJsonResponse<FooterLink[]>(res, [])
         if (Array.isArray(data)) {
-          const activeLinks = data.filter(l => l.isActive)
+          const activeLinks = data.filter((l) => l.isActive)
           const grouped = activeLinks.reduce((acc: Record<string, FooterLink[]>, link) => {
             if (!acc[link.column]) acc[link.column] = []
             acc[link.column].push(link)
@@ -45,8 +50,10 @@ export function Footer() {
           }, {})
           setColumns(grouped)
         }
-      })
-      .catch(err => console.error("Error fetching footer links:", err))
+      } catch (err) {
+        console.error("Error fetching footer links:", err)
+      }
+    })()
   }, [])
 
   return (

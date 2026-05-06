@@ -10,6 +10,7 @@ import { useGSAP } from "@gsap/react"
 import { gsap } from "@/lib/animations"
 import Image from "next/image"
 import { ScrollReveal } from "./scroll-reveal"
+import { parseJsonResponse } from "@/lib/utils"
 
 function PortfolioSkeleton() {
   return (
@@ -44,8 +45,8 @@ export function Portfolio() {
   const fetchProjects = async () => {
     try {
       const response = await fetch("/api/projects")
-      const data = await response.json()
-      setProjects(data || [])
+      const data = await parseJsonResponse<unknown[]>(response, [])
+      setProjects(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error("Error fetching projects:", error)
     }

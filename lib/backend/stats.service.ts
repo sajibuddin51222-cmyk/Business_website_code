@@ -1,7 +1,15 @@
 import prisma from '@/lib/db'
 
 export async function getCompanyStats() {
-  return prisma.companyStats.findFirst()
+  try {
+    return await prisma.companyStats.findFirst()
+  } catch (error) {
+    console.warn(
+      "[getCompanyStats] Database unavailable; using hero defaults.",
+      error instanceof Error ? error.message : error
+    )
+    return null
+  }
 }
 
 export async function updateCompanyStats(id: string, data: any) {

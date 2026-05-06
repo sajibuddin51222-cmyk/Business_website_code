@@ -1,8 +1,19 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/db"
+import { verifyAuth } from "@/lib/backend/auth.service"
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url)
+    const all = searchParams.get("all") === "true"
+    if (all) {
+      const user = await verifyAuth()
+      if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      const members = await prisma.teamMember.findMany({
+        orderBy: { order: "asc" },
+      })
+      return NextResponse.json(members)
+    }
     const members = await prisma.teamMember.findMany({
       where: { isActive: true },
       orderBy: { order: 'asc' }
@@ -14,6 +25,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const user = await verifyAuth()
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
   try {
     const data = await req.json()
     const member = await prisma.teamMember.create({

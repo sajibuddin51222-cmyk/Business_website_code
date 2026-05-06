@@ -9,6 +9,7 @@ import { useGSAP } from "@gsap/react"
 import { gsap, ScrollTrigger } from "@/lib/animations"
 import Link from "next/link"
 import { ScrollReveal } from "./scroll-reveal"
+import { parseJsonResponse } from "@/lib/utils"
 
 export function About() {
   const [points, setPoints] = useState<any[]>([])
@@ -22,8 +23,8 @@ export function About() {
   const fetchAboutPoints = async () => {
     try {
       const response = await fetch("/api/about")
-      const data = await response.json()
-      setPoints(data || [])
+      const data = await parseJsonResponse<unknown[]>(response, [])
+      setPoints(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error("Error fetching about points:", error)
     }

@@ -8,10 +8,8 @@ export function LoadingTransition() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Artificial delay to make the transition feel premium
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
+    // Short splash — long delays compete with route chunk compilation in dev and feel sluggish in prod
+    const timer = setTimeout(() => setIsLoading(false), 380)
 
     return () => clearTimeout(timer)
   }, [])

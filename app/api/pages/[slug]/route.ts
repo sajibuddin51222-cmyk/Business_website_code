@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/db"
+import { verifyAuth } from "@/lib/backend/auth.service"
 
-export async function GET(req: Request, { params }: { params: { slug: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
-    const { slug } = await Promise.resolve(params);
+    const { slug } = await params;
 
     const page = await prisma.page.findUnique({
       where: { slug },
@@ -19,9 +20,12 @@ export async function GET(req: Request, { params }: { params: { slug: string } }
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { slug: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ slug: string }> }) {
+  const user = await verifyAuth()
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
   try {
-    const { slug } = await Promise.resolve(params);
+    const { slug } = await params;
     const data = await req.json()
 
     const existing = await prisma.page.findUnique({ where: { slug } });
@@ -41,9 +45,12 @@ export async function PUT(req: Request, { params }: { params: { slug: string } }
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { slug: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ slug: string }> }) {
+  const user = await verifyAuth()
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
   try {
-    const { slug } = await Promise.resolve(params);
+    const { slug } = await params;
     const existing = await prisma.page.findUnique({ where: { slug } });
     if (!existing) return NextResponse.json({ error: "Page not found" }, { status: 404 });
 

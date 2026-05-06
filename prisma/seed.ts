@@ -1,112 +1,50 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { demoProjects, demoServices } from './demo-content'
+import { cmsPagesSeed } from './cms-pages-data'
+
+/**
+ * Demo admin (after seed):
+ *   Email:    admin@fusionbytepro.demo
+ *   Password: DemoAdmin123!
+ */
 
 const prisma = new PrismaClient()
 
-const projects = [
-    {
-        id: "ai-chatbot-platform",
-        title: "AI-Powered Chatbot Platform",
-        category: "AI Web Application",
-        description: "Intelligent conversational AI with natural language processing and multi-language support",
-        longDescription: "A state-of-the-art chatbot platform that leverages advanced NLP to understand and respond to user queries in real-time. It supports over 50 languages and integrates seamlessly with existing customer support systems.",
-        icon: "Brain",
-        tags: ["AI/ML", "Next.js", "Python"],
-        gradient: "from-blue-500 to-cyan-500",
-        features: ["Natural Language Understanding", "Multi-language Support", "Sentiment Analysis", "Customizable Personality", "Analytics Dashboard"],
-        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        screenshots: ["/placeholder.jpg", "/placeholder.jpg", "/placeholder.jpg"],
-        testLink: "#",
-    },
-    {
-        id: "smart-healthcare-app",
-        title: "Smart Healthcare Mobile App",
-        category: "AI Mobile App",
-        description: "AI-driven health monitoring app with predictive analytics and telemedicine features",
-        longDescription: "Revolutionizing patient care with AI. This app monitors vital signs, predicts potential health issues, and connects patients with doctors instantly. It features a secure, HIPAA-compliant architecture.",
-        icon: "Heart",
-        tags: ["React Native", "AI", "Healthcare"],
-        gradient: "from-pink-500 to-rose-500",
-        features: ["Real-time Vitals Monitoring", "AI Health Predictions", "Secure Video Consultations", "Medication Reminders", "Health History Tracking"],
-        videoUrl: "",
-        screenshots: ["/placeholder.jpg", "/placeholder.jpg"],
-        testLink: "#",
-    },
-    {
-        id: "ecommerce-ai-recommendation",
-        title: "E-Commerce AI Recommendation",
-        category: "AI Web Platform",
-        description: "Personalized shopping experience with AI-powered product recommendations",
-        longDescription: "Boost sales and customer engagement with our AI recommendation engine. It analyzes user behavior to suggest products they are most likely to buy, increasing conversion rates by up to 30%.",
-        icon: "ShoppingCart",
-        tags: ["AI", "E-commerce", "Analytics"],
-        gradient: "from-purple-500 to-indigo-500",
-        features: ["Personalized Feed", "Similar Product Suggestions", "Trend Analysis", "User Behavior Tracking", "A/B Testing Support"],
-        videoUrl: "",
-        screenshots: ["/placeholder.jpg", "/placeholder.jpg"],
-        testLink: "#",
-    },
-    {
-        id: "financial-dashboard",
-        title: "Financial Dashboard UI/UX",
-        category: "UI/UX Design",
-        description: "Modern fintech dashboard with intuitive data visualization and user experience",
-        longDescription: "A clean, modern, and intuitive dashboard design for a fintech platform. We focused on data visualization and ease of use, making complex financial data accessible to everyone.",
-        icon: "Palette",
-        tags: ["Figma", "UI/UX", "Design System"],
-        gradient: "from-green-500 to-emerald-500",
-        features: ["Interactive Charts", "Dark/Light Mode", "Responsive Layout", "Accessible Design", "Design System Components"],
-        videoUrl: "",
-        screenshots: ["/placeholder.jpg", "/placeholder.jpg"],
-        testLink: "#",
-    },
-    {
-        id: "realtime-analytics",
-        title: "Real-Time Analytics Platform",
-        category: "Web Development",
-        description: "Enterprise-grade analytics platform with real-time data processing",
-        longDescription: "Process and visualize millions of data points in real-time. This platform is built for scale, using WebSocket technology to deliver live updates without page refreshes.",
-        icon: "Zap",
-        tags: ["React", "Node.js", "WebSocket"],
-        gradient: "from-yellow-500 to-orange-500",
-        features: ["Live Data Streaming", "Customizable Widgets", "Role-based Access Control", "Data Export", "Alerting System"],
-        videoUrl: "",
-        screenshots: ["/placeholder.jpg", "/placeholder.jpg"],
-        testLink: "#",
-    },
-]
+/** Demo login — override with DEMO_ADMIN_EMAIL / DEMO_ADMIN_PASSWORD if set */
+const DEMO_ADMIN_EMAIL = process.env.DEMO_ADMIN_EMAIL ?? 'admin@fusionbytepro.demo'
+const DEMO_ADMIN_PASSWORD = process.env.DEMO_ADMIN_PASSWORD ?? 'DemoAdmin123!'
 
-const services = [
+const projects = demoProjects.map((p) => ({ ...p }))
+const services = demoServices.map((s) => ({ ...s }))
+
+const teamSeed = [
     {
-        title: "Web Development",
-        description: "Custom web applications built with cutting-edge technologies for optimal performance",
-        icon: "Globe",
-        gradient: "from-blue-500 to-cyan-500",
-        features: ["Responsive Design", "SEO Optimized", "Fast Performance", "Secure & Scalable"],
+        name: "Alex Rivera",
+        role: "Principal Engineer",
+        image: "/placeholder-user.jpg",
+        bio: "Leads architecture for cloud-native platforms and API design.",
         order: 1,
     },
     {
-        title: "Mobile App Development",
-        description: "Native and cross-platform mobile apps for iOS and Android",
-        icon: "Smartphone",
-        gradient: "from-purple-500 to-pink-500",
-        features: ["iOS & Android", "Cross-platform", "Native Performance", "App Store Deployment"],
+        name: "Morgan Chen",
+        role: "Design Lead",
+        image: "/placeholder-user.jpg",
+        bio: "Owns product UX, design systems, and client workshops.",
         order: 2,
     },
     {
-        title: "UI/UX Design",
-        description: "Beautiful, intuitive interfaces that users love",
-        icon: "Palette",
-        gradient: "from-orange-500 to-red-500",
-        features: ["User Research", "Wireframing", "Prototyping", "Design Systems"],
+        name: "Priya Shah",
+        role: "Engineering Manager",
+        image: "/placeholder-user.jpg",
+        bio: "Sprint planning, delivery metrics, and cross-functional alignment.",
         order: 3,
     },
     {
-        title: "AI Integration",
-        description: "Leverage artificial intelligence to automate and enhance your business",
-        icon: "Brain",
-        gradient: "from-green-500 to-teal-500",
-        features: ["Machine Learning", "Natural Language Processing", "Computer Vision", "Predictive Analytics"],
+        name: "Jordan Brooks",
+        role: "Mobile & Edge",
+        image: "/placeholder-user.jpg",
+        bio: "Flutter, React Native, and performance tuning at scale.",
         order: 4,
     },
 ]
@@ -115,7 +53,7 @@ const aboutPoints = [
     {
         title: "Expert Team",
         description: "Our team consists of seasoned developers, designers, and AI specialists with years of experience",
-        icon: "Users",
+        icon: "Globe",
         order: 1,
     },
     {
@@ -133,7 +71,7 @@ const aboutPoints = [
     {
         title: "Proven Track Record",
         description: "Successfully delivered 100+ projects across various industries with 98% client satisfaction",
-        icon: "Award",
+        icon: "Sparkles",
         order: 4,
     },
 ]
@@ -154,43 +92,64 @@ const companyStats = {
     yearsExperience: "10+",
 }
 
+const footerLinks = [
+    { title: "Web Development", url: "/#services", column: "Services", order: 1 },
+    { title: "UI/UX Design", url: "/#services", column: "Services", order: 2 },
+    { title: "App Development", url: "/#services", column: "Services", order: 3 },
+    { title: "Digital Marketing", url: "/#services", column: "Services", order: 4 },
+    { title: "Maintenance", url: "/#services", column: "Services", order: 5 },
+    { title: "About Us", url: "/about-us", column: "Company", order: 1 },
+    { title: "Our Team", url: "/our-team", column: "Company", order: 2 },
+    { title: "Careers", url: "/careers", column: "Company", order: 3 },
+    { title: "Portfolio", url: "/#portfolio", column: "Company", order: 4 },
+    { title: "Blog", url: "/blog", column: "Company", order: 5 },
+    { title: "Contact Us", url: "/#contact", column: "Support", order: 1 },
+    { title: "FAQ", url: "/faq", column: "Support", order: 2 },
+    { title: "Privacy Policy", url: "/privacy-policy", column: "Support", order: 3 },
+    { title: "Terms of Service", url: "/terms-of-service", column: "Support", order: 4 },
+    { title: "Documentation", url: "/documentation", column: "Support", order: 5 },
+]
+
 async function main() {
     console.log('🌱 Starting seed...')
 
-    // Seed Admin User
+    // Seed Admin User (demo credentials — see file header)
     console.log('👤 Seeding admin user...')
-    const adminEmail = "sajibuddin51222@gmail.com"
-    const adminPassword = "sajibuddin2516!@"
-    const hashedPassword = await bcrypt.hash(adminPassword, 10)
+    const hashedPassword = await bcrypt.hash(DEMO_ADMIN_PASSWORD, 10)
 
     await prisma.user.upsert({
-        where: { email: adminEmail },
-        update: { password: hashedPassword },
-        create: {
-            email: adminEmail,
+        where: { email: DEMO_ADMIN_EMAIL },
+        update: {
             password: hashedPassword,
-            name: "Admin User",
-            role: "ADMIN",
+            name: 'Demo Admin',
+            role: 'ADMIN',
+        },
+        create: {
+            email: DEMO_ADMIN_EMAIL,
+            password: hashedPassword,
+            name: 'Demo Admin',
+            role: 'ADMIN',
         },
     })
-    console.log('✅ Seeded admin user')
+    console.log(`✅ Seeded admin: ${DEMO_ADMIN_EMAIL}`)
 
     // Seed Projects
     console.log('📦 Seeding projects...')
     for (const project of projects) {
+        const { tags, features, screenshots, ...rest } = project
         await prisma.project.upsert({
             where: { id: project.id },
             update: {
-                ...project,
-                tags: JSON.stringify(project.tags),
-                features: JSON.stringify(project.features),
-                screenshots: JSON.stringify(project.screenshots),
+                ...rest,
+                tags: JSON.stringify(tags),
+                features: JSON.stringify(features),
+                screenshots: JSON.stringify(screenshots),
             },
             create: {
-                ...project,
-                tags: JSON.stringify(project.tags),
-                features: JSON.stringify(project.features),
-                screenshots: JSON.stringify(project.screenshots),
+                ...rest,
+                tags: JSON.stringify(tags),
+                features: JSON.stringify(features),
+                screenshots: JSON.stringify(screenshots),
             },
         })
     }
@@ -246,6 +205,47 @@ async function main() {
         })
     }
     console.log('✅ Seeded company stats')
+
+    // Footer links
+    console.log('🔗 Seeding footer links...')
+    await prisma.footerLink.deleteMany({})
+    await prisma.footerLink.createMany({
+        data: footerLinks.map((l) => ({ ...l, isActive: true })),
+    })
+    console.log(`✅ Seeded ${footerLinks.length} footer links`)
+
+    // Site hero config (ensures homepage CMS row exists)
+    console.log('⚙️  Seeding site config...')
+    await prisma.siteConfig.upsert({
+        where: { id: 'hero' },
+        update: {},
+        create: { id: 'hero' },
+    })
+    console.log('✅ Seeded site config')
+
+    console.log('📄 Seeding CMS pages...')
+    for (const p of cmsPagesSeed) {
+        const content = p.content.trim()
+        await prisma.page.upsert({
+            where: { slug: p.slug },
+            update: { title: p.title, content, isActive: true },
+            create: { slug: p.slug, title: p.title, content, isActive: true },
+        })
+    }
+    console.log(`✅ Seeded ${cmsPagesSeed.length} CMS pages`)
+
+    console.log('👥 Seeding team members...')
+    await prisma.teamMember.deleteMany({})
+    await prisma.teamMember.createMany({
+        data: teamSeed.map((m) => ({
+            ...m,
+            linkedin: 'https://linkedin.com',
+            twitter: null,
+            github: null,
+            isActive: true,
+        })),
+    })
+    console.log(`✅ Seeded ${teamSeed.length} team members`)
 
     console.log('🎉 Seed completed successfully!')
 }

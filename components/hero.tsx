@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { useGSAP } from "@gsap/react"
-import { gsap, ScrollTrigger } from "@/lib/animations"
+import { gsap } from "@/lib/animations"
 import Image from "next/image"
 
 export function Hero({ stats, settings }: { stats: any, settings: any }) {
@@ -16,10 +16,25 @@ export function Hero({ stats, settings }: { stats: any, settings: any }) {
     yearsExperience: stats?.yearsExperience || "10+",
   }
 
+  const DEFAULT_BADGE_LINE =
+    "Strategy, design, and engineering—partner with us to ship products your users love."
+
+  const rawTitle = settings?.heroTitle || "Transform Your Vision Into Digital Excellence"
+  const titleWords = rawTitle.trim().split(/\s+/).filter(Boolean)
+  const titleSplitIdx = Math.max(1, Math.ceil(titleWords.length / 2))
+  const titleLine1 = titleWords.slice(0, titleSplitIdx).join(" ")
+  const titleLine2 = titleWords.slice(titleSplitIdx).join(" ")
+
   const heroData = {
-    title: settings?.heroTitle || "Transform Your Vision Into Digital Excellence",
-    description: settings?.heroDescription || "We are a full-service digital agency specializing in web development, mobile apps, UI/UX design, and comprehensive digital solutions.",
-    bgImage: settings?.heroBgImage || "/images/hero_bg.png"
+    title: rawTitle,
+    description:
+      settings?.heroDescription ||
+      "We are a full-service digital agency specializing in web development, mobile apps, UI/UX design, and comprehensive digital solutions.",
+    bgImage: settings?.heroBgImage || "/images/hero_bg.png",
+    badgeSubtitle:
+      typeof settings?.heroBadgeSubtitle === "string" && settings.heroBadgeSubtitle.trim()
+        ? settings.heroBadgeSubtitle.trim()
+        : DEFAULT_BADGE_LINE,
   }
 
   const heroRef = useRef<HTMLDivElement>(null)
@@ -29,35 +44,19 @@ export function Hero({ stats, settings }: { stats: any, settings: any }) {
   const bgRef = useRef<HTMLDivElement>(null)
 
   useGSAP(() => {
-    // Mask Reveal for Title
-    gsap.to(".hero-title-mask", {
-      y: 0,
-      opacity: 1,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: "power4.out",
-      delay: 0.2
-    })
+    gsap.fromTo(
+      ".hero-title-line",
+      { y: 36, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.7,
+        stagger: 0.12,
+        ease: "power3.out",
+        delay: 0.12,
+      }
+    )
 
-    // Typing Animation for Description
-    const descriptionText = heroData.description
-    const descEl = document.querySelector(".hero-description")
-    if (descEl) {
-      descEl.textContent = ""
-      // Simple custom typing logic without plugin
-      let ctx = { val: 0 };
-      gsap.to(ctx, {
-        val: descriptionText.length,
-        duration: 1.5,
-        ease: "none",
-        delay: 0.5,
-        onUpdate: () => {
-          descEl.textContent = descriptionText.substring(0, Math.ceil(ctx.val));
-        }
-      })
-    }
-
-    // Set initial invisibility to prevent flicker, then reveal
     gsap.set(".hero-reveal", { visibility: "visible" })
 
     const tl = gsap.timeline({ defaults: { ease: "expo.out" } })
@@ -67,12 +66,22 @@ export function Hero({ stats, settings }: { stats: any, settings: any }) {
       opacity: 0,
       duration: 0.6,
     })
+      .from(
+        ".hero-description",
+        {
+          y: 24,
+          opacity: 0,
+          duration: 0.75,
+          ease: "power3.out",
+        },
+        "-=0.25"
+      )
       .from(".hero-cta", {
         scale: 0.9,
         opacity: 0,
         duration: 0.6,
         ease: "back.out(1.7)",
-      }, "+=0.5") // Wait for typing
+      }, "-=0.35")
       .from(".stat-item", {
         y: 30,
         opacity: 0,
@@ -92,18 +101,6 @@ export function Hero({ stats, settings }: { stats: any, settings: any }) {
     // Parallax Effect for Background
     gsap.to(bgRef.current, {
       yPercent: 10,
-      ease: "none",
-      scrollTrigger: {
-        trigger: heroRef.current,
-        start: "top top",
-        end: "bottom top",
-        scrub: true
-      }
-    })
-
-    // Parallax for Heading
-    gsap.to(".hero-title-mask", {
-      y: -30,
       ease: "none",
       scrollTrigger: {
         trigger: heroRef.current,
@@ -174,42 +171,48 @@ export function Hero({ stats, settings }: { stats: any, settings: any }) {
         <div className="bg-floating absolute bottom-[15%] right-[5%] w-[45vw] h-[45vw] max-w-[500px] max-h-[500px] bg-purple-500/5 rounded-full blur-[70px]" />
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-5xl mx-auto text-center">
+      <div className="container mx-auto px-4 relative z-20">
+        <div className="max-w-5xl mx-auto text-center relative z-20">
           {/* Badge */}
-          <div className="hero-reveal hero-badge inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary/10 border border-primary/20 mb-6 invisible">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <span className="text-sm md:text-base font-bold text-foreground">TURNING IDEAS INTO DIGITAL REALITY</span>
+          <div className="hero-reveal hero-badge mx-auto flex max-w-3xl flex-col items-center gap-2 px-6 py-4 rounded-3xl bg-primary/15 border border-primary/25 backdrop-blur-sm mb-8 invisible shadow-lg shadow-black/20">
+            <div className="flex items-center justify-center gap-2 text-center">
+              <Sparkles className="w-5 h-5 shrink-0 text-primary" aria-hidden />
+              <span className="text-sm md:text-base font-black uppercase tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.75)]">
+                TURNING IDEAS INTO DIGITAL REALITY
+              </span>
+            </div>
+            <p className="text-xs md:text-sm font-medium leading-snug text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] px-1">
+              {heroData.badgeSubtitle}
+            </p>
           </div>
 
-          {/* Main heading with Mask Reveal */}
-          <h1 ref={headingRef} className="text-3xl md:text-5xl lg:text-7xl font-black mb-10 text-balance leading-[1.05] tracking-tight">
-            {heroData.title.split(' ').length > 4 ? (
+          {/* Main heading — no overflow clipping; light text + gradient for dark hero */}
+          <h1
+            ref={headingRef}
+            className="hero-heading mb-10 text-balance font-black tracking-tight leading-[1.08]"
+          >
+            {titleLine2 ? (
               <>
-                <div className="text-mask">
-                  <span className="hero-title-mask inline-block text-foreground translate-y-[110%] opacity-0">
-                   {heroData.title.split(' ').slice(0, 3).join(' ')}
-                  </span>
-                </div>
-                <br />
-                <div className="text-mask">
-                  <span className="hero-title-mask inline-block text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-blue-500 translate-y-[90%] opacity-0">
-                    {heroData.title.split(' ').slice(3).join(' ')}
-                  </span>
-                </div>
+                <span className="hero-title-line block text-3xl md:text-5xl lg:text-7xl text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.88),0_1px_2px_rgba(0,0,0,0.9)]">
+                  {titleLine1}
+                </span>
+                <span
+                  className="hero-title-line mt-2 md:mt-3 block text-3xl md:text-5xl lg:text-7xl bg-gradient-to-r from-[oklch(0.72_0.2_280)] via-purple-400 to-[oklch(0.72_0.18_250)] bg-clip-text text-transparent [filter:drop-shadow(0_3px_28px_rgba(0,0,0,0.85))]"
+                  style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+                >
+                  {titleLine2}
+                </span>
               </>
             ) : (
-              <div className="text-mask">
-                <span className="hero-title-mask inline-block text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-blue-500 translate-y-[90%] opacity-0">
-                  {heroData.title}
-                </span>
-              </div>
+              <span className="hero-title-line block text-3xl md:text-5xl lg:text-7xl bg-gradient-to-r from-primary via-purple-400 to-blue-400 bg-clip-text text-transparent [filter:drop-shadow(0_3px_28px_rgba(0,0,0,0.85))]">
+                {titleLine1}
+              </span>
             )}
           </h1>
 
-          {/* Subheading with Typing Animation */}
-          <p className="hero-reveal hero-description text-lg md:text-2xl text-white/90 mb-14 max-w-4xl mx-auto text-pretty leading-relaxed invisible font-semibold typing-cursor min-h-[3em]">
-            {/* Animates via GSAP transition */}
+          {/* Main supporting copy (always in DOM for SEO & accessibility; animated in via GSAP) */}
+          <p className="hero-reveal hero-description text-lg md:text-2xl text-white mb-14 max-w-4xl mx-auto text-pretty leading-relaxed invisible font-semibold drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)]">
+            {heroData.description}
           </p>
 
           {/* CTA Buttons */}

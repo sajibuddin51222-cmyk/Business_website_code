@@ -10,9 +10,13 @@ export async function getSiteSettings() {
     }
     return settings;
   } catch (error) {
-    console.error("Error fetching site settings:", error);
+    console.warn(
+      "Error fetching site settings (using defaults):",
+      error instanceof Error ? error.message : error
+    );
     return {
       heroTitle: "Transform Your Vision Into Digital Excellence",
+      heroBadgeSubtitle: null,
       heroDescription: "We are a full-service digital agency specializing in web development, mobile apps, UI/UX design, and comprehensive digital solutions.",
       heroBgImage: null,
       processTitle: "How We Work",

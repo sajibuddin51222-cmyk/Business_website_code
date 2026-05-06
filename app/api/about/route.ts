@@ -3,10 +3,15 @@ import { getAllAboutPoints, createAboutPoint, updateAboutPoint, deleteAboutPoint
 import { verifyAuth } from '@/lib/backend/auth.service'
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const activeOnly = searchParams.get('activeOnly') !== 'false'
-  const points = await getAllAboutPoints(activeOnly)
-  return NextResponse.json(points)
+  try {
+    const { searchParams } = new URL(request.url)
+    const activeOnly = searchParams.get('activeOnly') !== 'false'
+    const points = await getAllAboutPoints(activeOnly)
+    return NextResponse.json(points)
+  } catch (err) {
+    console.warn('[GET /api/about]', err instanceof Error ? err.message : err)
+    return NextResponse.json([])
+  }
 }
 
 export async function POST(request: Request) {

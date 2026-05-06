@@ -120,7 +120,12 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: oklch(from var(--primary) l c h / 0.18);
   }
 }
 
@@ -202,6 +207,17 @@
 /* Base reveal state - elements start hidden to prevent FOUC */
 .gsap-reveal {
   visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .gsap-reveal,
+  .motion-safe-animate {
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
 }
 
 /* Mask Reveal for Text */

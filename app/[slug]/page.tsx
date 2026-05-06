@@ -4,8 +4,8 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { PageContent } from "@/components/page-content"
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const { slug } = await Promise.resolve(params);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const page = await prisma.page.findUnique({ where: { slug } })
   
   if (!page) return { title: "Not Found - FusionBytePro" }
@@ -16,8 +16,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function DynamicPage({ params }: { params: { slug: string } }) {
-  const { slug } = await Promise.resolve(params);
+export default async function DynamicPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
 
   const page = await prisma.page.findUnique({
     where: { slug }

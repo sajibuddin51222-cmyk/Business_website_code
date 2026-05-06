@@ -1,15 +1,23 @@
 import prisma from '@/lib/db'
 
 export async function getAllServices(activeOnly = true) {
-  const services = await prisma.service.findMany({
-    where: activeOnly ? { isActive: true } : {},
-    orderBy: { order: 'asc' },
-  })
-  
-  return services.map(service => ({
-    ...service,
-    features: JSON.parse(service.features || '[]')
-  }))
+  try {
+    const services = await prisma.service.findMany({
+      where: activeOnly ? { isActive: true } : {},
+      orderBy: { order: 'asc' },
+    })
+
+    return services.map((service) => ({
+      ...service,
+      features: JSON.parse(service.features || '[]'),
+    }))
+  } catch (error) {
+    console.warn(
+      '[getAllServices] Database unavailable; returning no services.',
+      error instanceof Error ? error.message : error
+    )
+    return []
+  }
 }
 
 export async function getServiceById(id: string) {

@@ -9,7 +9,8 @@ import { toast } from "sonner"
 import { useGSAP } from "@gsap/react"
 import { gsap, ScrollTrigger } from "@/lib/animations"
 
-import { ScrollReveal } from "./scroll-reveal"
+import { parseJsonResponse } from "@/lib/utils"
+import { DEFAULT_CONTACT_INFO } from "@/lib/public-defaults"
 
 export function Contact() {
   const [contactInfo, setContactInfo] = useState<any>(null)
@@ -31,25 +32,129 @@ export function Contact() {
   const fetchContactInfo = async () => {
     try {
       const response = await fetch("/api/contact")
-      const data = await response.json()
+      const data = await parseJsonResponse(response, { ...DEFAULT_CONTACT_INFO })
       setContactInfo(data)
     } catch (error) {
       console.error("Error fetching contact info:", error)
+      setContactInfo({ ...DEFAULT_CONTACT_INFO })
     }
     setLoading(false)
   }
 
   useGSAP(() => {
-    // Background orbs parallax/floating
-    gsap.to(".bg-orb", {
-      y: "random(-40, 40)",
-      x: "random(-40, 40)",
-      duration: "random(5, 10)",
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut",
-      stagger: 0.5
+    const mm = gsap.matchMedia()
+
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      gsap.to(".bg-orb", {
+        y: "random(-36, 36)",
+        x: "random(-36, 36)",
+        duration: "random(6, 11)",
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        stagger: 0.45,
+      })
     })
+
+    mm.add("(prefers-reduced-motion: reduce)", () => {
+      gsap.set(".bg-orb", { clearProps: "transform" })
+      gsap.set(
+        [
+          ".contact-header",
+          ".contact-card",
+          ".contact-form-shell",
+          ".contact-field",
+          ".contact-submit-wrap",
+        ],
+        { opacity: 1, visibility: "visible", clearProps: "transform" }
+      )
+    })
+
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      gsap.fromTo(
+        ".contact-header",
+        { y: 40, opacity: 0, visibility: "visible" },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.72,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".contact-header",
+            start: "top 88%",
+            toggleActions: "play none none none",
+          },
+        }
+      )
+
+      gsap.fromTo(
+        ".contact-card",
+        { x: -52, opacity: 0, visibility: "visible" },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.68,
+          stagger: 0.13,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".contact-info-stack",
+            start: "top 82%",
+            toggleActions: "play none none none",
+          },
+        }
+      )
+
+      gsap.fromTo(
+        ".contact-form-shell",
+        { x: 48, opacity: 0, visibility: "visible" },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.78,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".contact-form-shell",
+            start: "top 80%",
+            toggleActions: "play none none none",
+          },
+        }
+      )
+
+      gsap.fromTo(
+        ".contact-field",
+        { y: 32, opacity: 0, visibility: "visible" },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.52,
+          stagger: 0.085,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".contact-form-inner",
+            start: "top 78%",
+            toggleActions: "play none none none",
+          },
+        }
+      )
+
+      gsap.fromTo(
+        ".contact-submit-wrap",
+        { y: 24, opacity: 0, visibility: "visible" },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.58,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".contact-submit-wrap",
+            start: "top 92%",
+            toggleActions: "play none none none",
+          },
+        }
+      )
+    })
+
+    return () => mm.revert()
   }, { scope: containerRef })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -123,7 +228,7 @@ export function Contact() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <ScrollReveal className="text-center mb-20">
+          <div className="contact-header gsap-reveal text-center mb-20">
             <h2 className="text-4xl md:text-6xl font-black mb-6 tracking-tight">
               Get In{" "}
               <span className="bg-gradient-to-r from-primary via-purple-500 to-blue-500 bg-clip-text text-transparent">
@@ -131,20 +236,20 @@ export function Contact() {
               </span>
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Ready to start your project? Contact us today and let's create something amazing together
+              Ready to start your project? Contact us today and let&apos;s create something amazing together
             </p>
-          </ScrollReveal>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Contact Info Cards */}
-            <ScrollReveal animation="slide-left" stagger={0.15} className="contact-info-container space-y-6">
+            <div className="contact-info-stack space-y-6">
               {contactCards.map((card) => (
                 <Card
                   key={card.title}
-                  className="reveal-item rounded-[32px] border border-primary/10 p-8 bg-card hover:border-primary/50 group transition-colors duration-500 shadow-xl"
+                  className="contact-card gsap-reveal rounded-[32px] border border-primary/10 p-8 bg-card/95 backdrop-blur-sm hover:border-primary/45 group transition-all duration-500 shadow-xl hover:shadow-[0_24px_50px_-12px_rgba(104,107,253,0.2)] hover:-translate-y-1.5"
                 >
                   <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg shadow-primary/10">
+                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:scale-105 transition-all duration-500 shadow-lg shadow-primary/10">
                       <card.icon className="w-7 h-7 text-primary group-hover:text-white transition-all duration-300" />
                     </div>
                     <div>
@@ -162,15 +267,14 @@ export function Contact() {
                   </div>
                 </Card>
               ))}
-            </ScrollReveal>
+            </div>
 
             {/* Premium Contact Form */}
-            <ScrollReveal animation="fade-up" delay={0.3} className="lg:col-span-2">
-              <Card className="rounded-[48px] border-primary/10 p-10 md:p-16 bg-card shadow-2xl relative overflow-hidden">
-                <form onSubmit={handleSubmit} className="space-y-12 relative z-10">
+            <Card className="contact-form-shell gsap-reveal lg:col-span-2 rounded-[48px] border-primary/10 p-10 md:p-16 bg-card/95 backdrop-blur-sm shadow-2xl relative overflow-hidden ring-1 ring-primary/5">
+                <form onSubmit={handleSubmit} className="contact-form-inner space-y-12 relative z-10">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     {/* Name Field */}
-                    <div className="relative group">
+                    <div className="contact-field relative group">
                       <input
                         type="text"
                         id="name"
@@ -179,7 +283,7 @@ export function Contact() {
                         onChange={handleChange}
                         required
                         placeholder=" "
-                        className="peer w-full bg-transparent border-b-2 border-white/10 py-4 outline-none focus:border-primary transition-all duration-300 text-lg"
+                        className="peer w-full rounded-t-md bg-transparent border-b-2 border-border/80 py-4 outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300 text-lg"
                       />
                       <label 
                         htmlFor="name"
@@ -190,7 +294,7 @@ export function Contact() {
                     </div>
 
                     {/* Email Field */}
-                    <div className="relative group">
+                    <div className="contact-field relative group">
                       <input
                         type="email"
                         id="email"
@@ -199,7 +303,7 @@ export function Contact() {
                         onChange={handleChange}
                         required
                         placeholder=" "
-                        className="peer w-full bg-transparent border-b-2 border-white/10 py-4 outline-none focus:border-primary transition-all duration-300 text-lg"
+                        className="peer w-full rounded-t-md bg-transparent border-b-2 border-border/80 py-4 outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300 text-lg"
                       />
                       <label 
                         htmlFor="email"
@@ -211,7 +315,7 @@ export function Contact() {
                   </div>
 
                   {/* Phone Field */}
-                  <div className="relative group">
+                  <div className="contact-field relative group">
                     <input
                       type="tel"
                       id="phone"
@@ -219,7 +323,7 @@ export function Contact() {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder=" "
-                      className="peer w-full bg-transparent border-b-2 border-white/10 py-4 outline-none focus:border-primary transition-all duration-300 text-lg"
+                      className="peer w-full rounded-t-md bg-transparent border-b-2 border-border/80 py-4 outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300 text-lg"
                     />
                     <label 
                       htmlFor="phone"
@@ -230,7 +334,7 @@ export function Contact() {
                   </div>
 
                   {/* Message Field */}
-                  <div className="relative group">
+                  <div className="contact-field relative group">
                     <textarea
                       id="message"
                       name="message"
@@ -239,7 +343,7 @@ export function Contact() {
                       required
                       rows={4}
                       placeholder=" "
-                      className="peer w-full bg-transparent border-b-2 border-white/10 py-4 outline-none focus:border-primary transition-all duration-300 resize-none text-lg"
+                      className="peer w-full rounded-t-md bg-transparent border-b-2 border-border/80 py-4 outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300 resize-none text-lg"
                     />
                     <label 
                       htmlFor="message"
@@ -249,26 +353,27 @@ export function Contact() {
                     </label>
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full gradient-primary glow-primary text-xl h-20 rounded-2xl group transition-all duration-500 hover:scale-[1.02] active:scale-95 shadow-2xl shadow-primary/20"
-                    disabled={submitting}
-                  >
-                    {submitting ? (
-                      <Loader2 className="w-8 h-8 animate-spin" />
-                    ) : (
-                      <span className="flex items-center justify-center gap-3 font-black tracking-tight">
-                        SEND MESSAGE
-                        <Send className="w-6 h-6 group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform duration-500" />
-                      </span>
-                    )}
-                  </Button>
+                  <div className="contact-submit-wrap">
+                    <Button
+                      type="submit"
+                      className="w-full gradient-primary glow-primary text-xl h-20 rounded-2xl group transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-2xl shadow-primary/25"
+                      disabled={submitting}
+                    >
+                      {submitting ? (
+                        <Loader2 className="w-8 h-8 animate-spin" />
+                      ) : (
+                        <span className="flex items-center justify-center gap-3 font-black tracking-tight">
+                          SEND MESSAGE
+                          <Send className="w-6 h-6 group-hover:translate-x-2 group-hover:-translate-y-1 transition-transform duration-500" />
+                        </span>
+                      )}
+                    </Button>
+                  </div>
                 </form>
 
                 {/* Decorative background Radial */}
-                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/10 rounded-full blur-[100px] -z-10" />
+                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/10 rounded-full blur-[100px] -z-10 pointer-events-none" />
               </Card>
-            </ScrollReveal>
           </div>
         </div>
       </div>

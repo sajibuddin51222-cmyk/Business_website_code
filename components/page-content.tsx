@@ -1,5 +1,6 @@
 "use client"
 
+import DOMPurify from "isomorphic-dompurify"
 import { useRef } from "react"
 import { useGSAP } from "@gsap/react"
 import { gsap } from "@/lib/animations"
@@ -51,7 +52,12 @@ export function PageContent({ page }: { page: { title: string; content: string }
               [&>p>strong]:text-foreground [&>p>strong]:font-semibold
               [&>p>a]:text-primary [&>p>a]:underline [&>p>a]:underline-offset-4 hover:[&>p>a]:text-primary/80
               [&>p>em]:text-muted-foreground/70"
-            dangerouslySetInnerHTML={{ __html: page.content }}
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(page.content, {
+                ADD_TAGS: ["iframe"],
+                ADD_ATTR: ["allow", "allowfullscreen", "target", "rel"],
+              }),
+            }}
           />
         </ScrollReveal>
       </div>

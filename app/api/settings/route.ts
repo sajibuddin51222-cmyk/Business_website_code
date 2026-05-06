@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { verifyAuth } from "@/lib/backend/auth.service";
 
 export async function GET() {
   try {
@@ -20,6 +21,9 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
+  const user = await verifyAuth();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
     const data = await request.json();
     
